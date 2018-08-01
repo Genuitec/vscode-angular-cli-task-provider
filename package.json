@@ -1,0 +1,67 @@
+{
+    "name": "angular-cli-task-provider",
+    "displayName": "Angular CLI Task Provider",
+    "description": "Allows you to launch Angular CLI application using tasks",
+    "version": "1.0.0",
+    "publisher": "Genuitec",
+    "icon": "icon.png",
+    "license": "MIT",
+    "author": {
+        "email": "info@genuitec.com",
+        "name": "Genuitec, LLC",
+        "url": "https://www.genuitec.com/"
+    },
+    "repository": {
+        "url": "https://github.com/Genuitec/vscode-angular-cli-task-provider"
+    },
+    "engines": {
+        "vscode": "^1.24.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:workbench.action.tasks.runTask"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "taskDefinitions": [
+            {
+                "type": "angularcli",
+                "properties": {
+                    "option": {
+                        "type": "string",
+                        "enum": [
+                            "build",
+                            "build-watch",
+                            "serve"
+                        ]
+                    },
+                    "bin": {
+                        "type": "string"
+                    },
+                    "args": {
+                        "type": "array"
+                    }
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6"
+    },
+    "dependencies": {
+        "jsonc-parser": "^2.0.1"
+    }
+}
