@@ -62,6 +62,13 @@ interface PartialCustomTask {
     [key: string]: string | string [] | undefined; 
 }
 
+const DefinitionFields = [
+    'type',
+    'option',
+    'bin',
+    'args',
+];
+
 function optionToParams(option: RunOptions): string[] {
     const args: string[] = [];
 
@@ -155,7 +162,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
             }
 
             const customTasks = await this.getCustomTasks(workspaceFolder);
-
+    
             tasks = defaultTasks.map(task => {
                 const customTaskIndex = customTasks.findIndex(customTask => {
                     return Object.keys(customTask)
@@ -182,7 +189,11 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                         type: customTask.type,
                         option: customTask.option
                     };
-                    Object.keys(customTask).forEach(key => {
+                    Object.keys(customTask)
+                        .filter(key => {
+                            return DefinitionFields.indexOf(key) !== -1;
+                        })
+                        .forEach(key => {
                         taskDefinition[key] = customTask[key];
                     });
                     const bin = customTask.bin ? customTask.bin : suggestedNGBin;
