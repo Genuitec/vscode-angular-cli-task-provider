@@ -3,5 +3,5 @@ All notable changes to the "angular-cli-task-runner" extension will be documente
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## 1.0.0
 - Initial release

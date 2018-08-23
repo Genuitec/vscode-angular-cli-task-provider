@@ -1,7 +1,58 @@
 # VS Code Angular CLI Task Provider
 
 ## Description
-Allows you to launch Angular CLI application using tasks
+This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codemix/) to provide task support for running Angular CLI apps using `ng serve`, `ng build`, etc,.
+
+![Demo](images/ng-serve.gif)
+
+## Examples
+
+### Running ng serve on port 3000
+```
+// tasks.json entry
+{
+    "type": "angularcli",
+    "option": "serve",
+    "args": [
+        "--port",
+        "3000"
+    ]
+}
+```
+
+### Running ng build with production environment
+```
+// tasks.json entry
+{
+    "type": "angularcli",
+    "option": "build",
+    "args": [
+        "--prod"
+    ]
+}
+```
+
+### Capturing sass errors with ng serve
+
+```
+// tasks.json entry
+{
+    "type": "angularcli",
+    "option": "serve",
+    "problemMatcher": [
+        "$tsc",
+        {
+            "base": "$sass-loader",
+            "background": {
+                "activeOnStart": true,
+                "beginsPattern": "ℹ ｢wdm｣: Compiling...",
+                "endsPattern": "ℹ ｢wdm｣: (Failed to compile.|Compiled successfully.)"
+            }
+        }
+    ],
+    "isBackground": true
+}
+```
 
 ## License
 MIT

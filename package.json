@@ -1,7 +1,7 @@
 {
     "name": "angular-cli-task-provider",
     "displayName": "Angular CLI Task Provider",
-    "description": "Allows you to launch Angular CLI application using tasks",
+    "description": "This is used by Angular IDE by CodeMix (https://www.genuitec.com/products/codemix/) to provide task support for running Angular CLI apps using `ng serve`, `ng build`, etc,.",
     "version": "1.0.0",
     "publisher": "Genuitec",
     "icon": "icon.png",
@@ -17,6 +17,12 @@
     "engines": {
         "vscode": "^1.24.0"
     },
+    "keywords": [
+        "Angular",
+        "CLI",
+        "Task",
+        "Provider"
+    ],
     "categories": [
         "Other"
     ],
@@ -63,5 +69,8 @@
     },
     "dependencies": {
         "jsonc-parser": "^2.0.1"
-    }
+    },
+    "extensionDependencies": [
+        "Genuitec.sass-loader-problem-matcher"
+    ]
 }
