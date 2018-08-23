@@ -53,6 +53,7 @@ This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codem
     "isBackground": true
 }
 ```
+> You will need the [node-sass problem matcher](https://marketplace.visualstudio.com/items?itemName=Genuitec.sass-loader-problem-matcher) extension to catch sass errors.
 
 ## License
 MIT

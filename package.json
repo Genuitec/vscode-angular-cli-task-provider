@@ -69,8 +69,5 @@
     },
     "dependencies": {
         "jsonc-parser": "^2.0.1"
-    },
-    "extensionDependencies": [
-        "Genuitec.sass-loader-problem-matcher"
-    ]
+    }
 }
