@@ -59,6 +59,7 @@ interface PartialCustomTask {
     args?: string[];
     type: string;
     option: RunOptions;
+    angular: string;
     [key: string]: string | string [] | undefined; 
 }
 
@@ -67,6 +68,7 @@ const DefinitionFields = [
     'option',
     'bin',
     'args',
+    'angular',
 ];
 
 function optionToParams(option: RunOptions): string[] {
@@ -127,6 +129,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                 {
                     type: TASK_TYPE,
                     option: runOption[0],
+                    angular: workspaceFolder.uri.fsPath
                 },
                 workspaceFolder,
                 runOption[1],
@@ -187,7 +190,8 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                 ...customTasks.map(customTask => {
                     const taskDefinition: PartialCustomTask = {
                         type: customTask.type,
-                        option: customTask.option
+                        option: customTask.option,
+                        angular: customTask.angular
                     };
                     Object.keys(customTask)
                         .filter(key => {
@@ -249,11 +253,16 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                         if (objectNestingLevel === 0) {
                             inEntry = false;
                             if (isOurTaskType) {
+                                let angularWorkspaceFolder = currentTaskEntryProperties.get('angular');
+                                if (typeof angularWorkspaceFolder === 'string') {
+                                    angularWorkspaceFolder = angularWorkspaceFolder.replace('${workspaceFolder}', workspaceFolder.uri.fsPath);
+                                }
                                 const task: PartialCustomTask = {
                                     type: TASK_TYPE,
                                     option: currentTaskEntryProperties.get('option'),
                                     bin: currentTaskEntryProperties.get('bin') || undefined,
                                     port: currentTaskEntryProperties.get('port') || undefined,
+                                    angular: angularWorkspaceFolder
                                 };
     
                                 for(let entry of currentTaskEntryProperties.entries()) {
