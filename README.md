@@ -13,7 +13,7 @@ This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codem
 {
     "type": "angularcli",
     "option": "serve",
-    "angular": "/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
+    "angular": "relative/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
     "args": [
         "--port",
         "3000"
@@ -27,7 +27,7 @@ This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codem
 {
     "type": "angularcli",
     "option": "build",
-    "angular": "/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
+    "angular": "relative/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
     "args": [
         "--prod"
     ]
@@ -41,7 +41,7 @@ This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codem
 {
     "type": "angularcli",
     "option": "serve",
-    "angular": "/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
+    "angular": "relative/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
     "problemMatcher": [
         "$tsc",
         {

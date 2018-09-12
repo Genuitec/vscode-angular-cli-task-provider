@@ -66,8 +66,8 @@ interface PartialCustomTask {
 const DefinitionFields = [
     'type',
     'option',
-    'bin',
-    'args',
+    // 'bin',
+    // 'args',
     'angular',
 ];
 
@@ -129,7 +129,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                 {
                     type: TASK_TYPE,
                     option: runOption[0],
-                    angular: workspaceFolder.uri.fsPath
+                    angular: workspaceFolder.name
                 },
                 workspaceFolder,
                 runOption[1],
@@ -169,6 +169,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
             tasks = defaultTasks.map(task => {
                 const customTaskIndex = customTasks.findIndex(customTask => {
                     return Object.keys(customTask)
+                        .filter(key => DefinitionFields.indexOf(key) !== -1)
                         .every(key => {
                             return (task.definition as any)[key] === customTask[key];
                         });
@@ -176,6 +177,10 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
 
                 if (customTaskIndex !== -1) {
                     const customTask = customTasks[customTaskIndex];
+                    Object.keys(customTask)
+                        .forEach(key => {
+                            task.definition[key] = customTask[key];
+                        });
                     customTasks.splice(customTaskIndex, 1);
                     const bin = customTask.bin ? customTask.bin : suggestedNGBin;
                     task.execution = new vscode.ShellExecution(bin, optionToParams(task.definition.option));
@@ -255,7 +260,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                             if (isOurTaskType) {
                                 let angularWorkspaceFolder = currentTaskEntryProperties.get('angular');
                                 if (typeof angularWorkspaceFolder === 'string') {
-                                    angularWorkspaceFolder = angularWorkspaceFolder.replace('${workspaceFolder}', workspaceFolder.uri.fsPath);
+                                    angularWorkspaceFolder = angularWorkspaceFolder.replace('${workspaceFolder}', workspaceFolder.name);
                                 }
                                 const task: PartialCustomTask = {
                                     type: TASK_TYPE,
@@ -268,6 +273,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                                 for(let entry of currentTaskEntryProperties.entries()) {
                                     task[entry[0]] = entry[1];
                                 }
+                                task.angular = angularWorkspaceFolder;
                                 
                                 tasks.push(task);
                             }
