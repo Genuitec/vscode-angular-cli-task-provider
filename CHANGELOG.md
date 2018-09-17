@@ -3,6 +3,9 @@ All notable changes to the "angular-cli-task-runner" extension will be documente
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.2.0
+- Adding "$tsc-angular-cli" and "$tsc-angular-cli-watch" problem matchers
+
 ## 1.1.1
 - Fixes "angular" property handling
 

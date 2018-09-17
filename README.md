@@ -30,7 +30,8 @@ This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codem
     "angular": "relative/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
     "args": [
         "--prod"
-    ]
+    ],
+    "problemMatchers": [ "$tsc-angular-cli" ]
 }
 ```
 
@@ -43,7 +44,7 @@ This is used by Angular IDE by [CodeMix](https://www.genuitec.com/products/codem
     "option": "serve",
     "angular": "relative/path/to/angular/workspace", (Directory where the angular.json, angular-cli.json, etc, lives)
     "problemMatcher": [
-        "$tsc",
+        "$tsc-angular-cli-watch",
         {
             "base": "$sass-loader",
             "background": {

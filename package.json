@@ -2,7 +2,7 @@
     "name": "angular-cli-task-provider",
     "displayName": "Angular CLI Task Provider",
     "description": "This is used by Angular IDE by CodeMix (https://www.genuitec.com/products/codemix/) to provide task support for running Angular CLI apps using `ng serve`, `ng build`, etc,.",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "publisher": "Genuitec",
     "icon": "icon.png",
     "license": "MIT",
@@ -53,6 +53,49 @@
                         "type": "array"
                     }
                 }
+            }
+        ],
+        "problemPatterns": [
+            {
+                "name": "tsc-angular-cli",
+                "regexp": "^ERROR in ([^\\s].*)[\\(:](\\d+)[,:](\\d+)(?:\\):\\s+|\\s+-\\s+)(error|warning|info)\\s+(TS\\d+)\\s*:\\s*(.*)$",
+                "file": 1,
+                "line": 2,
+                "column": 3,
+                "severity": 4,
+                "code": 5,
+                "message": 6
+            }
+        ],
+        "problemMatchers": [
+            {
+                "name": "tsc-angular-cli",
+                "label": "%typescript.problemMatchers.tsc.label%",
+                "owner": "typescript",
+                "source": "ts",
+                "applyTo": "closedDocuments",
+                "fileLocation": [
+                    "relative",
+                    "${cwd}"
+                ],
+                "pattern": "$tsc-angular-cli"
+            },
+            {
+                "name": "tsc-angular-cli-watch",
+                "label": "%typescript.problemMatchers.tsc.label%",
+                "owner": "typescript",
+                "source": "ts",
+                "applyTo": "closedDocuments",
+                "fileLocation": [
+                    "relative",
+                    "${cwd}"
+                ],
+                "pattern": "$tsc-angular-cli",
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "ℹ ｢wdm｣: Compiling...",
+                    "endsPattern": "ℹ ｢wdm｣: (Failed to compile.|Compiled successfully.)"
+                  }
             }
         ]
     },
