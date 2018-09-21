@@ -291,13 +291,6 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
             
             const customTasks = await this.getCustomTasks(workspaceFolder);
 
-            fs.appendFileSync('/home/txava/out.txt', 'default tasks\n' );
-            fs.appendFileSync('/home/txava/out.txt', JSON.stringify(defaultTasks)+'\n');
-            fs.appendFileSync('/home/txava/out.txt', '\n\n' );
-            fs.appendFileSync('/home/txava/out.txt', 'custom tasks\n' );
-            fs.appendFileSync('/home/txava/out.txt', JSON.stringify(customTasks)+'\n');
-            fs.appendFileSync('/home/txava/out.txt', '\n\n' );
-
             tasks = defaultTasks.map(task => {
 
                 let isCodeMix = false;
@@ -434,9 +427,6 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
             );
 
         } 
-
-        fs.appendFileSync('/home/txava/out.txt', 'end tasks\n' );
-        fs.appendFileSync('/home/txava/out.txt', JSON.stringify(tasks) );
 
         return tasks;
     }
