@@ -9,7 +9,7 @@ const DEFAULT_NG_BIN_LOCATION = 'node_modules/.bin/ng';
 
 const ANGULAR_CLI_CONF_FILENAMES = ['angular-cli.json', '.angular-cli.json', 'angular.json'];
 const TASK_TYPE = 'angularcli';
-const TASK_SOURCE = 'Angular CLI';
+const TASK_SOURCE = 'ng';
 
 enum RunOptions {
     Build = 'build',
@@ -18,9 +18,9 @@ enum RunOptions {
 }
 
 const runOptions = new Map<RunOptions, string>([
-    [RunOptions.Build, 'Build'],
-    [RunOptions.BuildWatch, 'Build (watch)'],
-    [RunOptions.Serve, 'Serve'],
+    [RunOptions.Build, 'build'],
+    [RunOptions.BuildWatch, 'watch'],
+    [RunOptions.Serve, 'serve'],
 ]);
 
 

@@ -3,6 +3,9 @@ All notable changes to the "angular-cli-task-runner" extension will be documente
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.3.1
+- Shortening tasks name
+
 ## 1.3.0
 - Rewrite command in order to support problem detection in CodeMix
 
