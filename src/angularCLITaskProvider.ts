@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { JSONVisitor, visit } from 'jsonc-parser';
+// import * as semver from 'semver';
 
 const DEFAULT_NG_BIN_LOCATION = 'node_modules/.bin/ng';
 
@@ -16,12 +17,22 @@ enum RunOptions {
     Serve = 'serve',
 }
 
-const runOptions = new Map<string, string>([
+const runOptions = new Map<RunOptions, string>([
     [RunOptions.Build, 'Build'],
     [RunOptions.BuildWatch, 'Build (watch)'],
     [RunOptions.Serve, 'Serve'],
 ]);
 
+
+export function removePrereleaseFromVersion(version: string) {
+    const versionMatch = version.match(/(\d*)\.(\d*)\.(\d*)/);
+    
+    if (versionMatch !== null) {
+        return versionMatch[0];
+    } else {
+        return version;
+    }
+}
 
 async function readFile(file: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
@@ -34,7 +45,7 @@ async function readFile(file: string): Promise<string> {
 	});
 }
 
-async function fileExists(file: string, mode: number): Promise<boolean> {
+export async function fileExists(file: string, mode: number): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
         fs.access(file, mode, (error) => {
             resolve(error ? false : true);
@@ -89,6 +100,7 @@ function optionToParams(option: RunOptions): string[] {
     return args;
 }
 
+
 export class AngularCLITaskProvider implements vscode.TaskProvider {
     async provideTasks(token?: vscode.CancellationToken | undefined): Promise<vscode.Task[]> {
         const folders = vscode.workspace.workspaceFolders;
@@ -101,7 +113,6 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                 })
             );
             resolved.forEach(result => {
-                console.log(result);
                 tasks.push(...result);
             });
         }
@@ -121,6 +132,25 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
         });
     }
 
+    generateLabel(workspacefolder: vscode.WorkspaceFolder, runOption: RunOptions) {
+        let label = '';
+
+        const runOptionText = runOptions.get(runOption);
+        if (runOptionText) {
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+
+            if (workspaceFolders && workspaceFolders.length > 1) {
+                label = `${runOptionText} - ${workspacefolder.name}`;
+            } else {
+                label = runOptionText;
+            }
+        } else {
+            label = workspacefolder.name;
+        }
+
+        return label;
+    }
+
     getDefaultTasks(workspaceFolder: vscode.WorkspaceFolder): vscode.Task[] {
         const tasks: vscode.Task[] = [];
 
@@ -132,7 +162,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                     angular: workspaceFolder.name
                 },
                 workspaceFolder,
-                runOption[1],
+                this.generateLabel(workspaceFolder, runOption[0]),
                 TASK_SOURCE,
             );
 
@@ -149,24 +179,128 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
         return tasks;
     }
 
-    async getTasks(workspaceFolder: vscode.WorkspaceFolder): Promise<vscode.Task[]> {
+    appendStyleProblemMatchersIfNeeded(task: vscode.Task, manifestObject: any, version: string) {
+        const problemMatchersToAdd = new Set<string>();
+        
+        if (
+            manifestObject &&
+            manifestObject.projects
+        ) {
+            Object.keys(manifestObject.projects).forEach(projectName => {
+                const project = manifestObject.projects[projectName];
+                if (
+                    project.schematics &&
+                    project.schematics['@schematics/angular:component'] &&
+                    project.schematics['@schematics/angular:component'].styleext
+                ) {
+                    switch(project.schematics['@schematics/angular:component'].styleext) {
+                        case 'sass':
+                        case 'scss':
+                            problemMatchersToAdd.add('$sass-loader')
+                            break;
+                        case 'less':
+                            problemMatchersToAdd.add('$less-loader')
+                            break;
+                        case 'styl':
+                            problemMatchersToAdd.add('$stylus-loader')
+                            break;
+                    }
+                }
+
+                if (
+                    project.architect &&
+                    project.architect.build &&
+                    project.architect.build.options &&
+                    project.architect.build.options.styles &&
+                    project.architect.build.options.styles.length > 0
+                ) {
+                    project.architect.build.options.styles.forEach((styleFile: string) => {
+                        const extension = path.extname(styleFile);
+                        switch (extension) {
+                            case '.scss':
+                            case '.sass':
+                                problemMatchersToAdd.add('$sass-loader');
+                                break;
+                            case '.less':
+                                problemMatchersToAdd.add('$less-loader');
+                                break;
+                            case '.styl':
+                                problemMatchersToAdd.add('$stylus-loader');
+                                break;
+                        }
+                    });
+                }
+            });
+        }
+
+        if (
+            manifestObject.defaults &&
+            manifestObject.defaults.styleExt
+        ) {
+            const styleExt = manifestObject.defaults.styleExt;
+            switch (styleExt) {
+                case 'sass':
+                case 'scss':
+                    problemMatchersToAdd.add('$sass-loader')
+                    break;
+                case 'less':
+                    problemMatchersToAdd.add('$less-loader')
+                    break;
+                case 'styl':
+                    problemMatchersToAdd.add('$stylus-loader')
+                    break;
+                    
+            }
+        }
+
+        for (let problemMatcher of problemMatchersToAdd) {
+            task.problemMatchers.push(problemMatcher);
+        }
+    }
+
+    public async getTasks(workspaceFolder: vscode.WorkspaceFolder, arg0?: any, arg1?: string): Promise<vscode.Task[]> {
         let tasks: vscode.Task[] = [];
+
+        // const packageContents = await readFile(path.join(workspaceFolder.uri.fsPath, 'package.json'));
+
+        // const manifestObject = JSON.parse(packageContents);
+
+        // let version = '6.0.0';
+
+        // if (
+        //     manifestObject.devDependencies &&
+        //     manifestObject.devDependencies['@angular/cli']
+        // ) {
+        //     version = manifestObject.devDependencies['@angular/cli'];
+        // }
+
+        // const cleanVersion = removePrereleaseFromVersion(version);
         const isAngularCLIProject = await this.isAngularCLIProject(workspaceFolder);
 
         if (isAngularCLIProject) {
             const defaultTasks = this.getDefaultTasks(workspaceFolder);
             const localNGPath = path.join(workspaceFolder.uri.fsPath, DEFAULT_NG_BIN_LOCATION);
             let suggestedNGBin: string;
+
             // Suggest to use local ng if detected, else use global
             if (await fileExists(localNGPath, fs.constants.X_OK | fs.constants.F_OK)) {
                 suggestedNGBin = localNGPath;
             } else {
                 suggestedNGBin = 'ng';
             }
-
+            
             const customTasks = await this.getCustomTasks(workspaceFolder);
-    
+
+            fs.appendFileSync('/home/txava/out.txt', 'default tasks\n' );
+            fs.appendFileSync('/home/txava/out.txt', JSON.stringify(defaultTasks)+'\n');
+            fs.appendFileSync('/home/txava/out.txt', '\n\n' );
+            fs.appendFileSync('/home/txava/out.txt', 'custom tasks\n' );
+            fs.appendFileSync('/home/txava/out.txt', JSON.stringify(customTasks)+'\n');
+            fs.appendFileSync('/home/txava/out.txt', '\n\n' );
+
             tasks = defaultTasks.map(task => {
+
+                let isCodeMix = false;
                 const customTaskIndex = customTasks.findIndex(customTask => {
                     return Object.keys(customTask)
                         .filter(key => DefinitionFields.indexOf(key) !== -1)
@@ -177,16 +311,76 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
 
                 if (customTaskIndex !== -1) {
                     const customTask = customTasks[customTaskIndex];
+
+                    if (customTask.codemix) {
+                        isCodeMix = true;
+                    }
+
+                    delete customTask.codemix;
+
                     Object.keys(customTask)
                         .forEach(key => {
                             task.definition[key] = customTask[key];
                         });
                     customTasks.splice(customTaskIndex, 1);
-                    const bin = customTask.bin ? customTask.bin : suggestedNGBin;
-                    task.execution = new vscode.ShellExecution(bin, optionToParams(task.definition.option));
+                    let bin = customTask.bin ? customTask.bin : suggestedNGBin;
+                    let params: string[] = [];
+                    if (
+                        isCodeMix
+                    ) {
+                        bin = 'node_modules/.bin/tsc';
+                        switch (task.definition.option) {
+                            case RunOptions.BuildWatch:
+                                params = ['--watch', '-p', workspaceFolder.uri.fsPath];
+                                break;
+                            case RunOptions.Build:
+                                params = ['-p', workspaceFolder.uri.fsPath];
+                                break;
+                            default:
+                                optionToParams(task.definition.option);
+                        }
+                    } else {
+                        params = optionToParams(task.definition.option);
+                    }
+                    
+                    task.execution = new vscode.ShellExecution(bin, params);
                 } else {
-                    task.execution = new vscode.ShellExecution(suggestedNGBin, optionToParams(task.definition.option));
+
+                    if (
+                        isCodeMix 
+                    ) {
+                        suggestedNGBin = 'node_modules/.bin/tsc';
+                        const params = ['--watch', '-p', workspaceFolder.uri.fsPath];
+                        // const params = task.definition.option === RunOptions.BuildWatch ? ['--watch', '-p', workspaceFolder.uri.fsPath] : optionToParams(task.definition.option);
+                        task.execution = new vscode.ShellExecution(suggestedNGBin, params);
+                    } else {
+                        task.execution = new vscode.ShellExecution(suggestedNGBin, optionToParams(task.definition.option));
+                    }
                 }
+
+                if (
+                    isCodeMix 
+                ) {
+                    switch (task.definition.option) {
+                        case RunOptions.BuildWatch:
+                            task.problemMatchers = [ '$tsc-watch' ];
+                            break;
+                        case RunOptions.Build:
+                            task.problemMatchers = [ '$tsc' ];
+                            break;
+                    }
+                } else {
+                    switch (task.definition.option) {
+                        case RunOptions.BuildWatch:
+                            task.problemMatchers = [ '$tsc-angular-cli-watch' ];
+                            break;
+                        case RunOptions.Build:
+                            task.problemMatchers = [ '$tsc-angular-cli' ];
+                            break;
+                    }
+                }
+
+                // this.appendStyleProblemMatchersIfNeeded(task, manifestObject, version);
 
                 return task;
             });
@@ -198,6 +392,14 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                         option: customTask.option,
                         angular: customTask.angular
                     };
+                    // let isCodeMix = false;
+
+                    // if (customTask.codemix) {
+                    //     isCodeMix = true;
+                    // }
+
+                    delete customTask.codemix;
+
                     Object.keys(customTask)
                         .filter(key => {
                             return DefinitionFields.indexOf(key) !== -1;
@@ -215,7 +417,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                     const task = new vscode.Task(
                         taskDefinition,
                         workspaceFolder,
-                        taskDefinition.option,
+                        this.generateLabel(workspaceFolder, taskDefinition.option),
                         TASK_SOURCE,
                         new vscode.ShellExecution(bin, args)
                     );
@@ -232,7 +434,10 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
             );
 
         } 
-        
+
+        fs.appendFileSync('/home/txava/out.txt', 'end tasks\n' );
+        fs.appendFileSync('/home/txava/out.txt', JSON.stringify(tasks) );
+
         return tasks;
     }
     
@@ -304,6 +509,7 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                         } else {
                             currentTaskEntryProperties.set(currentEntryField, value);
                         }
+
                         if (currentEntryField === 'type') {
                             taskTypeIdentified = true;
                             isOurTaskType = value === TASK_TYPE ? true : false;
@@ -317,6 +523,10 @@ export class AngularCLITaskProvider implements vscode.TaskProvider {
                             (taskTypeIdentified && isOurTaskType)
                         ) {
                             currentEntryField = property;
+
+                            if (currentEntryField === 'codemix') {
+                                currentTaskEntryProperties.set('codemix', true);
+                            }
                         }
                     } else {
                         if (property === 'tasks') {

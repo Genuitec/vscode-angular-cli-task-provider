@@ -2,7 +2,7 @@
     "name": "angular-cli-task-provider",
     "displayName": "Angular CLI Task Provider",
     "description": "This is used by Angular IDE by CodeMix (https://www.genuitec.com/products/codemix/) to provide task support for running Angular CLI apps using `ng serve`, `ng build`, etc,.",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "publisher": "Genuitec",
     "icon": "icon.png",
     "license": "MIT",
@@ -70,7 +70,7 @@
         "problemMatchers": [
             {
                 "name": "tsc-angular-cli",
-                "label": "%typescript.problemMatchers.tsc.label%",
+                "label": "tsc-angular-cli",
                 "owner": "typescript",
                 "source": "ts",
                 "applyTo": "closedDocuments",
@@ -82,7 +82,7 @@
             },
             {
                 "name": "tsc-angular-cli-watch",
-                "label": "%typescript.problemMatchers.tsc.label%",
+                "label": "tsc-angular-cli-watch",
                 "owner": "typescript",
                 "source": "ts",
                 "applyTo": "closedDocuments",
@@ -95,7 +95,7 @@
                     "activeOnStart": true,
                     "beginsPattern": "ℹ ｢wdm｣: Compiling...",
                     "endsPattern": "ℹ ｢wdm｣: (Failed to compile.|Compiled successfully.)"
-                  }
+                }
             }
         ]
     },
@@ -108,12 +108,16 @@
     },
     "devDependencies": {
         "@types/mocha": "^2.2.42",
+        "@types/mock-fs": "^3.6.30",
         "@types/node": "^7.0.43",
+        "mock-fs": "^4.7.0",
         "tslint": "^5.8.0",
         "typescript": "^2.6.1",
         "vscode": "^1.1.6"
     },
     "dependencies": {
-        "jsonc-parser": "^2.0.1"
+        "@types/semver": "^5.5.0",
+        "jsonc-parser": "^2.0.1",
+        "semver": "^5.5.1"
     }
 }
